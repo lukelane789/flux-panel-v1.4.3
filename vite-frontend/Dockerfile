@@ -4,7 +4,9 @@ FROM node:20.19.0 AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+
+# 忽略 peer dependency 冲突
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
@@ -13,9 +15,8 @@ RUN npm run build
 FROM nginx:stable-alpine AS production-stage
 
 COPY nginx.conf /etc/nginx/nginx.conf
-
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["nginx", "-g", "daemon off;"]
